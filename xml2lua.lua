@@ -1,7 +1,14 @@
-saveDirPath = "/xxx/"   --- 保存转好的lua文件路劲(其中xxx代表的是路径，下同)  
-xmlDirPath  = "/xxx/" --- 待转的xml文件路径  
+saveDirPath = "F:/"   --- 保存转好的lua文件路劲(其中xxx代表的是路径，下同)  
+xmlDirPath  = "F:/" --- 待转的xml文件路径  
 require "lfs"   
-function SaveTableContent(file, obj)  
+
+function add_spacing( file, depth )
+    for i=1,depth do
+        file:write("  ")
+    end
+end
+
+function SaveTableContent(file, obj, depth)  
       local szType = type(obj);  
       if szType == "number" then  
             file:write(obj);  
@@ -12,8 +19,10 @@ function SaveTableContent(file, obj)
             -- print(obj.nodeFlag)  
             if obj.nodeFlag ~= nil then  
                 if obj:numProperties() == 0 and obj:numChildren() == 0 then   
-                    SaveTableContent(file, obj:value() or "");  
+                    SaveTableContent(file, obj:value() or "", depth+1);  
                 else  
+                    file:write("\n")
+                    add_spacing(file, depth)
                     file:write("{");  
                     if obj:numProperties() ~= 0 then  
                         -- print(obj)  
@@ -26,9 +35,9 @@ function SaveTableContent(file, obj)
                             local propertieValue = propertie.value  
                             -- print("")  
                                 file:write("[");  
-                                SaveTableContent(file, propertieName);  
+                                SaveTableContent(file, propertieName, depth+1);  
                                 file:write("]=");  
-                                SaveTableContent(file, propertieValue);  
+                                SaveTableContent(file, propertieValue, depth+1);  
                                 if i ~= #properties then file:write(", ") end  
   
   
@@ -56,9 +65,9 @@ function SaveTableContent(file, obj)
                         end  
                         for i,v in pairs(allChildrenTable) do  
                             file:write("[");  
-                            SaveTableContent(file, i);  
+                            SaveTableContent(file, i, depth+1);  
                             file:write("]=");  
-                            SaveTableContent(file, v);  
+                            SaveTableContent(file, v, depth+1);  
                             file:write(", ");  
                              -- print("key:"..i..#v)  
                         end  
@@ -67,14 +76,16 @@ function SaveTableContent(file, obj)
                     file:write("}");  
                 end  
             else  
+                file:write("\n")
+                add_spacing(file, depth)                
                 file:write("{");  
                 for i, v in pairs(obj) do  
                    local vType = type(v)  
                     if vType ~= "function" then  
                         file:write("[");  
-                        SaveTableContent(file, i);  
+                        SaveTableContent(file, i, depth+1);  
                         file:write("]=");  
-                        SaveTableContent(file, v );  
+                        SaveTableContent(file, v, depth+1);  
                         file:write(", ");  
                     end  
                 end  
@@ -93,7 +104,7 @@ function SaveTable(fileName,obj)
       local file = io.open(savePath, "w");  
       file:write("local "..string.gsub(fileName, ".xml", "").." = \n");  
       -- print(fileName);  
-      SaveTableContent(file, obj);  
+      SaveTableContent(file, obj, 0);  
       file:write("\nreturn  "..string.gsub(fileName, ".xml", "") );  
       file:close();  
 end  
@@ -107,7 +118,7 @@ function newParser()
         value = string.gsub(value, "&", "&"); -- '&' -> "&"  
         value = string.gsub(value, "<", "<"); -- '<' -> "<"  
         value = string.gsub(value, ">", ">"); -- '>' -> ">"  
-        value = string.gsub(value, "\"", """); -- '"' -> """  
+        value = string.gsub(value, "\"", "\""); -- '"' -> """  
         value = string.gsub(value, "([^%w%&%;%p%\t% ])",  
             function(c)  
                 print("c::::------->>>>>"..string.byte(c))  
@@ -128,7 +139,7 @@ function newParser()
                 print("h::::------->>>>>"..string.char(tonumber(h, 10)))  
                 return string.char(tonumber(h, 10))  
             end);  
-        value = string.gsub(value, """, "\"");  
+        value = string.gsub(value, "\"", "\"");  
         value = string.gsub(value, "'", "'");  
         value = string.gsub(value, ">", ">");  
         value = string.gsub(value, "<", "<");  
