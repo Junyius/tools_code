@@ -41,7 +41,12 @@ function SaveTableContent(file, obj, depth)
   
   
                         end  
-                        if obj:numChildren() ~= 0 then file:write(",") end  
+                        if obj:numChildren() == 0 then 
+                            file:write(",") 
+                            SaveTableContent(file, obj:value() or "", depth+1); 
+                        else
+                            file:write(",") 
+                        end  
                     end  
                     if obj:numChildren() ~= 0 then  
                          -- print("numChildren:"..tostring(obj:numChildren()))  
