@@ -111,6 +111,22 @@ function SaveTable(fileName,obj)
       file:write("\nreturn  "..string.gsub(fileName, ".xml", "") );  
       file:close();  
 end  
+
+function SaveTableWithRootName(fileName,obj)  
+      -- print(path);  
+      -- printLog();  
+      local fileNewName = string.gsub(fileName, ".xml", ".lua");  
+      local savePath = saveDirPath..fileNewName  
+      local file = io.open(savePath, "w");  
+      local RootName = obj:children()[1]:name()
+      file:write("local "..string.gsub(RootName, ".xml", "").." = ");  
+      -- print(fileName);  
+      obj:children()[1].___props ={}
+      SaveTableContent(file, obj:children()[1], 0);  
+      file:write("\nreturn  "..string.gsub(RootName, ".xml", "") );  
+      file:close();  
+end 
+
 function newParser()  
   
   
@@ -315,7 +331,8 @@ function getpathes(rootpath, pathes)
                               xmlText = string.gsub(xmlText, "<!%-%-(.-)%-%->", "")  
                               -- print("xmlText:"..xmlText)  
                               local textObj = parser.ParseXmlText(parser, xmlText)  
-                              SaveTable(entry, textObj);  
+                              -- SaveTable(entry, textObj);  
+                              SaveTableWithRootName(entry, textObj)
                               --local flag = true  
                               --for i,v in ipairs(exclude2MapArr) do  
                               --      if v == string.gsub(entry, ".xml", "") then  
