@@ -26,7 +26,6 @@ function SaveTableContent(file, obj, depth)
                     file:write("{");  
                     if obj:numProperties() ~= 0 then  
                         -- print(obj)  
-                        file:write("[\"$\"]={");  
                         local pTable = {}  
                         local properties = obj:properties()  
                         for i=1, #properties do  
@@ -42,7 +41,6 @@ function SaveTableContent(file, obj, depth)
   
   
                         end  
-                        file:write("}");  
                         if obj:numChildren() ~= 0 then file:write(",") end  
                     end  
                     if obj:numChildren() ~= 0 then  
@@ -149,7 +147,7 @@ function newParser()
   
   
     function XmlParser:ParseArgs(node, s)  
-        string.gsub(s, "(%w+)=([\"'])(.-)%2", function(w, _, a)  
+        string.gsub(s, "([%w_:]+)=([\"'])(.-)%2", function(w, _, a)  
             node:addProperty(w, self:FromXmlString(a))  
         end)  
     end  
